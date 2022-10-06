@@ -91,7 +91,8 @@ fig_layout = dbc.Container([
                 type="default",
                 children=dcc.Graph(
                     id='Protocol_FIG',
-                    figure={}
+                    figure={},
+                    style={'height': '100vh'}
                 )
             ),
         ], className="g-0"),
@@ -101,7 +102,8 @@ fig_layout = dbc.Container([
                 type="default",
                 children=dcc.Graph(
                     id='DATA_FIG',
-                    figure={}
+                    figure={},
+                    style={'height': '100vh'}
                 )
             ),
         ], className="g-0"),
@@ -111,7 +113,8 @@ fig_layout = dbc.Container([
                 type="default",
                 children=dcc.Graph(
                     id='VoNR_TECH_BAR_FIG',
-                    figure={}
+                    figure={},
+                    style={'height': '100vh'}
                 )
             ),
         ], className="g-0"),
@@ -122,7 +125,8 @@ fig_layout = dbc.Container([
                     type="default",
                     children=dcc.Graph(
                         id='VoNR_Result_MAP_FIG',
-                        figure={}
+                        figure={},
+                        style={'height': '100vh'}
                     )
                 ),
             ], width=6),
@@ -132,7 +136,8 @@ fig_layout = dbc.Container([
                     type="default",
                     children=dcc.Graph(
                         id='TECH_MAP_FIG',
-                        figure={}
+                        figure={},
+                        style={'height': '100vh'}
                     )
                 ),
             ], width=6),
@@ -143,7 +148,8 @@ fig_layout = dbc.Container([
                 type="default",
                 children=dcc.Graph(
                     id='Voice_HO_SINR_RSRP_BAR_FIG',
-                    figure={}
+                    figure={},
+                    style={'height': '100vh'}
                 )
             ),
         ], className="g-0"),
@@ -154,7 +160,8 @@ fig_layout = dbc.Container([
                     type="default",
                     children=dcc.Graph(
                         id='RSRP_MAP_FIG',
-                        figure={}
+                        figure={},
+                        style={'height': '100vh'}
                     )
                 ),
             ], width=6),
@@ -164,7 +171,8 @@ fig_layout = dbc.Container([
                     type="default",
                     children=dcc.Graph(
                         id='SINR_MAP_FIG',
-                        figure={}
+                        figure={},
+                        style={'height': '100vh'}
                     )
                 ),
             ], width=6)
