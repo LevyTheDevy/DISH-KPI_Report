@@ -78,10 +78,6 @@ fig_layout = dbc.Container([
                     )
                 ]),
                 dbc.Col([
-                    html.P("Refresh Report", className='pt-3'),
-                    dbc.Button("Refresh", id="update-fig", className="me-2", n_clicks=0),
-                ]),
-                dbc.Col([
                     html.Div(id='Generate-output')
                 ])
             ]),
@@ -240,20 +236,17 @@ def parse_contents(contents, filename, date):
               Output('RSRP_MAP_FIG', 'figure'),
               Output('SINR_MAP_FIG', 'figure'),
               Input('my-date-picker-single-report', 'date'),
-              Input('input-market', 'value'),
-              Input('update-fig', 'n_clicks'),
+              Input('input-market', 'value')
               )
-def update_output(date, market, n_clicks):
-    if n_clicks is not None and market is not None:
+def update_output(date, market):
+    if market is not None:
         # Read Main DF DATA
         data_dataframe = pd.DataFrame(sh.worksheet("Data_" + date).get_all_records())
         data_dataframe = data_dataframe.convert_dtypes()
-        data_dataframe = data_dataframe[data_dataframe['Date'] == date]
         data_market_DF = data_dataframe[data_dataframe['Market'] == market]
         # Read Main DF Voice
         voice_dataframe = pd.DataFrame(sh.worksheet("Voice_" + date).get_all_records())
         voice_dataframe = voice_dataframe.convert_dtypes()
-        voice_dataframe = voice_dataframe[voice_dataframe['Date'] == date]
         voice_market_DF = voice_dataframe[voice_dataframe['Market'] == market]
 
         name = str(date) + " " + str(market)
