@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
-
 from apps.Upload import navbar
 
 # Todo Before deploy
@@ -38,6 +37,7 @@ sh = gc.open("KPI_DATA")
 
 # Connect to main app.py file
 from app import app
+from app import server
 # Connect to your app pages
 from apps import Upload
 
