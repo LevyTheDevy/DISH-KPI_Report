@@ -9,5 +9,6 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.QUARTZ], suppress_cal
 
 # Main Server
 app.title = 'DISH KPI Report'
-app._favicon = ("./assets/icon.ico")
+app._favicon = ("icon.ico")
 server = app.server
+

@@ -136,7 +136,7 @@ def Protocol_FIG(df, name):
     return fig
 
 
-px.set_mapbox_access_token(open("./assets/map.mapbox_token").read())
+px.set_mapbox_access_token(open("assets/map.mapbox_token").read())
 
 
 def RSRP_MAP_FIG(df, name):

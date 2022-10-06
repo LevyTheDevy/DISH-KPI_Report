@@ -32,7 +32,7 @@ Voice_KPI_REQ = ["TIME_STAMP", "GPS Lat", "GPS Lon", "Voice Call", "5G KPI PCell
 from fig import Protocol_FIG, DATA_FIG, VoNR_TECH_BAR_FIG, VoNR_Result_MAP_FIG, TECH_MAP_FIG, \
     Voice_HO_SINR_RSRP_BAR_FIG, RSRP_MAP_FIG, SINR_MAP_FIG
 
-gc = gspread.service_account(filename='./assets/custom-producer-357322-a044a0660521.json')
+gc = gspread.service_account(filename='assets/custom-producer-357322-a044a0660521.json')
 sh = gc.open("KPI_DATA")
 
 # Connect to main app.py file
