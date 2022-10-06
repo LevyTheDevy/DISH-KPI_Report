@@ -2,6 +2,7 @@ import base64
 import datetime
 import io
 import random
+import time
 from datetime import date
 import dash
 import dash_bootstrap_components as dbc
@@ -24,10 +25,10 @@ Data_KPI_REQ = ["TIME_STAMP", "GPS Lon", "GPS Lat", "Event Technology", "5G KPI 
                 "5G KPI Total Info Layer1 PUSCH Throughput [Mbps]", "5G KPI PCell Layer1 DL BLER [%]",
                 "5G KPI PCell Layer1 UL BLER [%]", "5G KPI PCell Layer1 DL MCS (Avg)",
                 "5G KPI PCell Layer1 UL MCS (Avg)", "AutoCallSummary Status", "5G KPI PCell Layer1 RACH Reason",
-                "5G KPI PCell Layer1 RACH Result", "5G KPI PCell RF Band", "5G KPI Total Info DL CA Type", "Market"]
+                "5G KPI PCell Layer1 RACH Result", "5G KPI PCell RF Band", "5G KPI Total Info DL CA Type"]
 Voice_KPI_REQ = ["TIME_STAMP", "GPS Lat", "GPS Lon", "Voice Call", "5G KPI PCell RF Serving SS-RSRP [dBm]",
                  "5G KPI PCell RF Serving SS-SINR [dB]", "Event Technology",
-                 "5G-NR RRC NR MCG Mobility Statistics Intra-NR HandoverResult", "AutoCallSummary Status", "Market"]
+                 "5G-NR RRC NR MCG Mobility Statistics Intra-NR HandoverResult", "AutoCallSummary Status"]
 
 from fig import Protocol_FIG, DATA_FIG, VoNR_TECH_BAR_FIG, VoNR_Result_MAP_FIG, TECH_MAP_FIG, \
     Voice_HO_SINR_RSRP_BAR_FIG, RSRP_MAP_FIG, SINR_MAP_FIG
@@ -241,13 +242,11 @@ def parse_contents(contents, filename, date):
 def update_output(date, market):
     if market is not None:
         # Read Main DF DATA
-        data_dataframe = pd.DataFrame(sh.worksheet("Data_" + date).get_all_records())
-        data_dataframe = data_dataframe.convert_dtypes()
-        data_market_DF = data_dataframe[data_dataframe['Market'] == market]
+        data_dataframe = pd.DataFrame(sh.worksheet(market + "_Data_" + date).get_all_records())
+        data_market_DF = data_dataframe.convert_dtypes()
         # Read Main DF Voice
-        voice_dataframe = pd.DataFrame(sh.worksheet("Voice_" + date).get_all_records())
-        voice_dataframe = voice_dataframe.convert_dtypes()
-        voice_market_DF = voice_dataframe[voice_dataframe['Market'] == market]
+        voice_dataframe = pd.DataFrame(sh.worksheet(market + "_Voice_" + date).get_all_records())
+        voice_market_DF = voice_dataframe.convert_dtypes()
 
         name = str(date) + " " + str(market)
         return Protocol_FIG(data_market_DF, name), \
@@ -272,48 +271,71 @@ def update_output(n_clicks, market):
         T_ARRAY = []
         df_date = T_dataframe['TIME_STAMP'].iloc[0]
         date_string = str(df_date).split()[0]
-        T_dataframe['Market'] = market
         T_dataframe['TIME_STAMP'] = T_dataframe['TIME_STAMP'].astype(str)
         for col in T_dataframe.columns:
             T_ARRAY.append(col)
+        TYPE = []
         if T_ARRAY == Data_KPI_REQ:
             type = 'Data'
+            TYPE.append('Data')
             try:
-                Main_Data_worksheet = sh.add_worksheet(title=type + "_" + date_string, rows=100, cols=20)
+                Main_Data_worksheet = sh.add_worksheet(title=market + "_" + type + "_" + date_string, rows=100, cols=20)
+                time.sleep(3)
             except:
-                Main_Data_worksheet = sh.worksheet(type + "_" + date_string)
+                Main_Data_worksheet = sh.worksheet(market + "_" + type + "_" + date_string)
+                time.sleep(1)
             M_dataframe = pd.DataFrame(Main_Data_worksheet.get_all_records())
+            time.sleep(1)
             dataframe = pd.concat([M_dataframe, T_dataframe], axis=0)
             dataframe = dataframe.fillna(np.nan).replace([np.nan], ['NaN'])
             # Write Main DF
             Main_Data_worksheet.update([dataframe.columns.values.tolist()] + dataframe.values.tolist())
+            time.sleep(3)
             sh.del_worksheet(sh.worksheet(TEMP_NAME[0]))
             TEMP_NAME.clear()
             return html.H5("TPUT Data uploaded successfully!", className='text-success')
         elif T_ARRAY == Voice_KPI_REQ:
             type = 'Voice'
+            TYPE.append('Voice')
             try:
-                Main_Voice_worksheet = sh.add_worksheet(title=type + "_" + date_string, rows=100, cols=20)
+                Main_Voice_worksheet = sh.add_worksheet(title=market + "_" + type + "_" + date_string, rows=100,cols=20)
+                time.sleep(3)
             except:
-                Main_Voice_worksheet = sh.worksheet(type + "_" + date_string)
+                Main_Voice_worksheet = sh.worksheet(market + "_" + type + "_" + date_string)
+                time.sleep(1)
             M_dataframe = pd.DataFrame(Main_Voice_worksheet.get_all_records())
             dataframe = pd.concat([M_dataframe, T_dataframe], axis=0)
             dataframe = dataframe.fillna(np.nan).replace([np.nan], ['NaN'])
             # Write Main DF
             Main_Voice_worksheet.update([dataframe.columns.values.tolist()] + dataframe.values.tolist())
+            time.sleep(3)
             sh.del_worksheet(sh.worksheet(TEMP_NAME[0]))
             TEMP_NAME.clear()
             return html.H5("Voice Data uploaded successfully!", className='text-success')
         else:
-            return html.Div([
-                html.H5('ERROR: Either DATA TYPE is incorrect or you are missing KPIs!', className='text-danger'),
-                html.H6('Provided KPI'),
-                html.P(str(T_ARRAY)),
-                html.Hr(),
-                html.H6('Required KPI'),
-                html.P(str(Data_KPI_REQ))
-            ])
+            if TYPE == ['Data']:
+                TYPE.clear()
+                return html.Div([
+                    html.H5('ERROR: Either DATA TYPE is incorrect or you are missing KPIs!', className='text-danger'),
+                    html.H6('Provided KPI'),
+                    html.P(str(T_ARRAY)),
+                    html.Hr(),
+                    html.H6('Required KPI'),
+                    html.P(str(Data_KPI_REQ))
+                ])
+            else:
+                TYPE.clear()
+                return html.Div([
+                    html.H5('ERROR: Either DATA TYPE is incorrect or you are missing KPIs!', className='text-danger'),
+                    html.H6('Provided KPI'),
+                    html.P(str(T_ARRAY)),
+                    html.Hr(),
+                    html.H6('Required KPI'),
+                    html.P(str(Voice_KPI_REQ))
+                ])
     return False
+
+
 # html.Li(i) for i in worksheet_list
 
 @app.callback(Output('output-data-upload', 'children'),
@@ -350,4 +372,4 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
