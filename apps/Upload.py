@@ -34,7 +34,7 @@ layout = html.Div([
     html.Div(id='output-data-upload-settings'),
 ])
 
-DISH_LOGO = ".assets\logo.png"
+DISH_LOGO = "./assets/logo.png"
 
 navbar = html.Div([
     dcc.Location(id='url', refresh=False),
