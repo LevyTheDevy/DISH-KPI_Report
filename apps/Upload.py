@@ -27,70 +27,45 @@ layout = html.Div([
         children=html.Div(id='output-data-upload')
     ),
     dcc.Loading(
-        id="loading-2",
+        id="loading-7",
         type="default",
         children=html.Div(id='output-data-message')
     ),
-    dcc.Loading(
-        id="loading-3",
-        type="default",
-        children=html.Div(id='output-data-upload-settings')
-    ),
+    html.Div(id='output-data-upload-settings'),
 ])
 
 DISH_LOGO = ".assets\logo.png"
 
 navbar = html.Div([
-dcc.Location(id='url', refresh=False),
-dbc.Navbar(
-    dbc.Container(
-        [
-            html.A(
-                # Use row and col to control vertical alignment of logo / brand
-                dbc.Row(
-                    [
-                        dbc.Col(html.Img(src="https://www.linkpicture.com/q/logo_56.png", height="30px")),
-                    ],
-                    align="center",
-                    className="g-0",
+    dcc.Location(id='url', refresh=False),
+    dbc.Navbar(
+        dbc.Container(
+            [
+                html.A(
+                    # Use row and col to control vertical alignment of logo / brand
+                    dbc.Row(
+                        [
+                            dbc.Col(html.Img(src="https://www.linkpicture.com/q/logo_56.png", height="30px")),
+                        ],
+                        align="center",
+                        className="g-0",
+                    ),
+                    href="index",
+                    style={"textDecoration": "none"},
                 ),
-                href="index",
-                style={"textDecoration": "none"},
-            ),
-            dbc.NavbarToggler(id="navbar-toggler", n_clicks=0),
-            dbc.DropdownMenu(direction="start",
-                children=[
-                    dbc.DropdownMenuItem("Home", href="index"),
-                    dbc.DropdownMenuItem("Upload", href="/apps/Upload")
-                ],
-                nav=True,
-                in_navbar=True,
-                label="More",
-            ),
-        ]
-    ),
-    color="dark",
-    dark=True,
+                dbc.NavbarToggler(id="navbar-toggler", n_clicks=0),
+                dbc.DropdownMenu(direction="start",
+                                 children=[
+                                     dbc.DropdownMenuItem("Home", href="index"),
+                                     dbc.DropdownMenuItem("Upload", href="/apps/Upload")
+                                 ],
+                                 nav=True,
+                                 in_navbar=True,
+                                 label="More",
+                                 ),
+            ]
+        ),
+        color="dark",
+        dark=True,
     )
 ])
-
-OLD_NAV = html.Div([
-    dcc.Location(id='url', refresh=False),
-    dbc.NavbarSimple(
-        children=[
-            dbc.NavItem(dbc.NavLink("Home", href="index")),
-            dbc.DropdownMenu(
-                children=[
-                    dbc.DropdownMenuItem("More pages", header=True),
-                    dbc.DropdownMenuItem("Upload", href="/apps/Upload")
-                ],
-                nav=True,
-                in_navbar=True,
-                label="More",
-            ),
-        ],
-        brand="DISH KPI Reports",
-        brand_href="index",
-        color="primary",
-        dark=True),
-]),

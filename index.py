@@ -1,11 +1,12 @@
 import base64
 import datetime
 import io
+import random
 from datetime import date
 import dash
+import dash_bootstrap_components as dbc
 import gspread
 import numpy as np
-import dash_bootstrap_components as dbc
 import pandas as pd
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
@@ -24,19 +25,16 @@ Data_KPI_REQ = ["TIME_STAMP", "GPS Lon", "GPS Lat", "Event Technology", "5G KPI 
                 "5G KPI Total Info Layer1 PUSCH Throughput [Mbps]", "5G KPI PCell Layer1 DL BLER [%]",
                 "5G KPI PCell Layer1 UL BLER [%]", "5G KPI PCell Layer1 DL MCS (Avg)",
                 "5G KPI PCell Layer1 UL MCS (Avg)", "AutoCallSummary Status", "5G KPI PCell Layer1 RACH Reason",
-                "5G KPI PCell Layer1 RACH Result", "5G KPI PCell RF Band", "5G KPI Total Info DL CA Type"]
+                "5G KPI PCell Layer1 RACH Result", "5G KPI PCell RF Band", "5G KPI Total Info DL CA Type", "Market"]
 Voice_KPI_REQ = ["TIME_STAMP", "GPS Lat", "GPS Lon", "Voice Call", "5G KPI PCell RF Serving SS-RSRP [dBm]",
                  "5G KPI PCell RF Serving SS-SINR [dB]", "Event Technology",
-                 "5G-NR RRC NR MCG Mobility Statistics Intra-NR HandoverResult", "AutoCallSummary Status"]
+                 "5G-NR RRC NR MCG Mobility Statistics Intra-NR HandoverResult", "AutoCallSummary Status", "Market"]
 
 from fig import Protocol_FIG, DATA_FIG, VoNR_TECH_BAR_FIG, VoNR_Result_MAP_FIG, TECH_MAP_FIG, \
     Voice_HO_SINR_RSRP_BAR_FIG, RSRP_MAP_FIG, SINR_MAP_FIG
 
 gc = gspread.service_account(filename='assets/custom-producer-357322-a044a0660521.json')
 sh = gc.open("KPI_DATA")
-Main_Voice_worksheet = sh.worksheet("MAIN_VOICE")
-Main_Data_worksheet = sh.worksheet("MAIN_DATA")
-Temp_worksheet = sh.worksheet("TEMP")
 
 # Connect to main app.py file
 from app import app
@@ -194,6 +192,9 @@ def display_page(pathname):
         return fig_layout
 
 
+TEMP_NAME = []
+
+
 def parse_contents(contents, filename, date):
     content_type, content_string = contents.split(',')
 
@@ -208,7 +209,14 @@ def parse_contents(contents, filename, date):
             df = pd.read_excel(io.BytesIO(decoded))
             df = df.fillna(np.nan).replace([np.nan], ['NaN'])
             df['TIME_STAMP'] = df['TIME_STAMP'].astype(str)
-            Temp_worksheet.clear()
+            if TEMP_NAME != []:
+                sh.del_worksheet(sh.worksheet(TEMP_NAME[0]))
+                TEMP_NAME.clear()
+            TEMP_NAME.append("TEMP_" + str(random.randint(0, 500)))
+            try:
+                Temp_worksheet = sh.add_worksheet(title=str(TEMP_NAME[0]), rows=100, cols=20)
+            except:
+                Temp_worksheet = sh.worksheet(str(TEMP_NAME[0]))
             Temp_worksheet.update([df.columns.values.tolist()] + df.values.tolist())
     except Exception as e:
         print(e)
@@ -238,12 +246,12 @@ def parse_contents(contents, filename, date):
 def update_output(date, market, n_clicks):
     if n_clicks is not None and market is not None:
         # Read Main DF DATA
-        data_dataframe = pd.DataFrame(Main_Data_worksheet.get_all_records())
+        data_dataframe = pd.DataFrame(sh.worksheet("Data_" + date).get_all_records())
         data_dataframe = data_dataframe.convert_dtypes()
         data_dataframe = data_dataframe[data_dataframe['Date'] == date]
         data_market_DF = data_dataframe[data_dataframe['Market'] == market]
         # Read Main DF Voice
-        voice_dataframe = pd.DataFrame(Main_Voice_worksheet.get_all_records())
+        voice_dataframe = pd.DataFrame(sh.worksheet("Voice_" + date).get_all_records())
         voice_dataframe = voice_dataframe.convert_dtypes()
         voice_dataframe = voice_dataframe[voice_dataframe['Date'] == date]
         voice_market_DF = voice_dataframe[voice_dataframe['Market'] == market]
@@ -263,65 +271,57 @@ def update_output(date, market, n_clicks):
 
 @app.callback(Output('output-data-message', 'children'),
               Input('submit-val', 'n_clicks'),
-              Input('input-market-upload', 'value'),
-              Input('input-data-type-upload', 'value'),
-              Input('my-date-picker-single', 'date')
+              Input('input-market-upload', 'value')
               )
-def update_output(n_clicks, market, type, date):
+def update_output(n_clicks, market):
     if n_clicks > 0:
-        if type == 'Data':
-            # Read Main DF
+        T_dataframe = pd.DataFrame(sh.worksheet(TEMP_NAME[0]).get_all_records())
+        T_ARRAY = []
+        df_date = T_dataframe['TIME_STAMP'].iloc[0]
+        date_string = str(df_date).split()[0]
+        T_dataframe['Market'] = market
+        T_dataframe['TIME_STAMP'] = T_dataframe['TIME_STAMP'].astype(str)
+        for col in T_dataframe.columns:
+            T_ARRAY.append(col)
+        if T_ARRAY == Data_KPI_REQ:
+            type = 'Data'
+            try:
+                Main_Data_worksheet = sh.add_worksheet(title=type + "_" + date_string, rows=100, cols=20)
+            except:
+                Main_Data_worksheet = sh.worksheet(type + "_" + date_string)
             M_dataframe = pd.DataFrame(Main_Data_worksheet.get_all_records())
-            T_dataframe = pd.DataFrame(Temp_worksheet.get_all_records())
-            T_ARRAY = []
-            for col in T_dataframe.columns:
-                T_ARRAY.append(col)
-            if T_ARRAY == Data_KPI_REQ:
-                T_dataframe['Market'] = market
-                T_dataframe['Date'] = date
-                T_dataframe['TIME_STAMP'] = T_dataframe['TIME_STAMP'].astype(str)
-                dataframe = pd.concat([M_dataframe, T_dataframe], axis=0)
-                dataframe = dataframe.fillna(np.nan).replace([np.nan], ['NaN'])
-                # Write Main DF
-                Main_Data_worksheet.update([dataframe.columns.values.tolist()] + dataframe.values.tolist())
-                return html.H5("Data uploaded successfully!", className='text-success')
-            else:
-                return html.Div([
-                    html.H5('ERROR: Either DATA TYPE is incorrect or you are missing KPIs!', className='text-danger'),
-                    html.H6('Provided KPI'),
-                    html.P(str(T_ARRAY)),
-                    html.Hr(),
-                    html.H6('Required KPI'),
-                    html.P(str(Data_KPI_REQ))
-                ])
-        else:
-            # Read Main DF
+            dataframe = pd.concat([M_dataframe, T_dataframe], axis=0)
+            dataframe = dataframe.fillna(np.nan).replace([np.nan], ['NaN'])
+            # Write Main DF
+            Main_Data_worksheet.update([dataframe.columns.values.tolist()] + dataframe.values.tolist())
+            sh.del_worksheet(sh.worksheet(TEMP_NAME[0]))
+            TEMP_NAME.clear()
+            return html.H5("TPUT Data uploaded successfully!", className='text-success')
+        elif T_ARRAY == Voice_KPI_REQ:
+            type = 'Voice'
+            try:
+                Main_Voice_worksheet = sh.add_worksheet(title=type + "_" + date_string, rows=100, cols=20)
+            except:
+                Main_Voice_worksheet = sh.worksheet(type + "_" + date_string)
             M_dataframe = pd.DataFrame(Main_Voice_worksheet.get_all_records())
-            T_dataframe = pd.DataFrame(Temp_worksheet.get_all_records())
-            T_ARRAY = []
-            for col in T_dataframe.columns:
-                T_ARRAY.append(col)
-            if T_ARRAY == Voice_KPI_REQ:
-                T_dataframe['Market'] = market
-                T_dataframe['Date'] = date
-                T_dataframe['TIME_STAMP'] = T_dataframe['TIME_STAMP'].astype(str)
-                dataframe = pd.concat([M_dataframe, T_dataframe], axis=0)
-                dataframe = dataframe.fillna(np.nan).replace([np.nan], ['NaN'])
-                # Write Main DF
-                Main_Voice_worksheet.update([dataframe.columns.values.tolist()] + dataframe.values.tolist())
-                return html.H5("Data uploaded successfully!", className='text-success')
-            else:
-                return html.Div([
-                    html.H5('ERROR: Either DATA TYPE is incorrect or you are missing KPIs!', className='text-danger'),
-                    html.H6('Provided KPI'),
-                    html.P(str(T_ARRAY)),
-                    html.Hr(),
-                    html.H6('Required KPI'),
-                    html.P(str(Voice_KPI_REQ))
-                ])
-    else:
-        return False
-
+            dataframe = pd.concat([M_dataframe, T_dataframe], axis=0)
+            dataframe = dataframe.fillna(np.nan).replace([np.nan], ['NaN'])
+            # Write Main DF
+            Main_Voice_worksheet.update([dataframe.columns.values.tolist()] + dataframe.values.tolist())
+            sh.del_worksheet(sh.worksheet(TEMP_NAME[0]))
+            TEMP_NAME.clear()
+            return html.H5("Voice Data uploaded successfully!", className='text-success')
+        else:
+            return html.Div([
+                html.H5('ERROR: Either DATA TYPE is incorrect or you are missing KPIs!', className='text-danger'),
+                html.H6('Provided KPI'),
+                html.P(str(T_ARRAY)),
+                html.Hr(),
+                html.H6('Required KPI'),
+                html.P(str(Data_KPI_REQ))
+            ])
+    return False
+# html.Li(i) for i in worksheet_list
 
 @app.callback(Output('output-data-upload', 'children'),
               Output('output-data-upload-settings', 'children'),
@@ -345,27 +345,7 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
                     )
                 ]),
                 dbc.Col([
-                    html.P("Select Data Type", className='pt-3'),
-                    dbc.Select(
-                        id="input-data-type-upload",
-                        options=[
-                            {"label": "Voice Data File", "value": "Voice"},
-                            {"label": "Protocol/Data File", "value": "Data"}
-                        ],
-                    )
-                ]),
-                dbc.Col([
-                    html.P("Select Today's Date", className='pt-3'),
-                    dcc.DatePickerSingle(
-                        id='my-date-picker-single',
-                        min_date_allowed=date(2022, 9, 20),
-                        max_date_allowed=date(2023, 10, 1),
-                        initial_visible_month=date.today(),
-                        date=date.today()
-                    ),
-                ]),
-                dbc.Col([
-                    html.P("Upload Data", className='pt-3'),
+                    html.P("Upload Now", className='pt-3'),
                     dbc.Button(
                         "Upload", id="submit-val", className="me-2", n_clicks=0
                     ),
@@ -377,4 +357,4 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True, host='0.0.0.0', port='8080')
+    app.run_server(debug=True)
