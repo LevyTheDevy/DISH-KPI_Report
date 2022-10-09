@@ -23,7 +23,7 @@ auth = dash_auth.BasicAuth(
 
 # Main Server
 app.title = 'DISH KPI Report'
-app._favicon = ("icon.ico")
+#app.favicon = ("icon.ico")
 server = app.server
 
 
