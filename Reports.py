@@ -1,23 +1,21 @@
 from PIL import Image
 from fpdf import FPDF
 
-NEW_FIG_ARRAY = []
 File_Name = ['Protocol', 'Data', 'PIE_CAll', 'Map', 'TECH', 'BAR_CALL', 'RSRP', 'SINR', ]
-logo = Image.open(r"assets/images/LOGO.png").convert("RGBA")
-logo_M = Image.open(r"assets/images/LOGO_MAIN.png").convert("RGBA")
+logo = Image.open(r"LOGO.png").convert("RGBA")
+logo_M = Image.open(r"LOGO_MAIN.png").convert("RGBA")
 
 
 
 def Generate_Report(fig_array):
-    NEW_FIG_ARRAY = fig_array
     # Images File Names
     pdf = FPDF()
-    for plot in NEW_FIG_ARRAY:
-        plot.write_image("IMAGES/" + File_Name[NEW_FIG_ARRAY.index(plot)] + ".jpeg", width=1122.5, height=794)
-        cover = Image.open('IMAGES/' + File_Name[NEW_FIG_ARRAY.index(plot)] + ".jpeg")
+    for plot in fig_array:
+        plot.write_image("assets/images/" + File_Name[fig_array.index(plot)] + ".jpeg", width=1122.5, height=794)
+        cover = Image.open('assets/images/' + File_Name[fig_array.index(plot)] + ".jpeg")
         cover.paste(logo, (1080, 760,), logo)
         cover.paste(logo_M, (455, 15,), logo_M)
-        cover.save("IMAGES/" + File_Name[NEW_FIG_ARRAY.index(plot)] + ".jpeg", format='jpeg')
+        cover.save("assets/images/" + File_Name[fig_array.index(plot)] + ".jpeg", format='jpeg')
         width, height = cover.size
 
         # convert pixel in mm with 1px=0.264583 mm
@@ -35,7 +33,8 @@ def Generate_Report(fig_array):
 
         pdf.add_page(orientation=orientation)
 
-        pdf.image('IMAGES/' + File_Name[NEW_FIG_ARRAY.index(plot)] + ".jpeg", 0, 0, width, height)
+        pdf.image('assets/images/' + File_Name[fig_array.index(plot)] + ".jpeg", 0, 0, width, height)
+    print("Report Created")
     return pdf
 
 

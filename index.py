@@ -12,6 +12,8 @@ import numpy as np
 import pandas as pd
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
+from dash.long_callback import DiskcacheLongCallbackManager
+
 from Reports import Generate_Report
 from apps.Upload import navbar
 
@@ -21,6 +23,11 @@ from apps.Upload import navbar
 # Todo HIGH: Optimize speed and comment code.
 # Todo MID: Update Graphs with Date Information.
 # Todo LOW: Add LOGO/ICON/Page Title / Credits.
+
+## Diskcache
+import diskcache
+cache = diskcache.Cache("./cache")
+long_callback_manager = DiskcacheLongCallbackManager(cache)
 
 Data_KPI_REQ = ["TIME_STAMP", "GPS Lon", "GPS Lat", "Event Technology", "5G KPI PCell RF Serving SS-RSRP [dBm]",
                 "5G KPI PCell RF Serving SS-SINR [dB]", "5G KPI Total Info Layer1 PDSCH Throughput [Mbps]",
@@ -298,14 +305,17 @@ def update_output(date, market):
         raise dash.exceptions.PreventUpdate
 
 
-@app.callback(Output('Generate-output-dl', 'data'), Input('Generate-val', 'n_clicks'))
+@app.callback(Output('Generate-output-dl', 'data'), Input('Generate-val', 'n_clicks'), manager=long_callback_manager,)
 def update_output(n_clicks):
     if n_clicks > 0:
         if len(REPORT_NAME) >= 2:
             return dcc.send_file("assets/reports/" + str(REPORT_NAME[0]) + ".pdf")
         else:
             Generate_Report(FIG_ARRAY).output("assets/reports/" + str(REPORT_NAME[0]) + ".pdf")
+            time.sleep(3)
             return dcc.send_file("assets/reports/" + str(REPORT_NAME[0]) + ".pdf")
+    else:
+        raise dash.exceptions.PreventUpdate
 
 
 @app.callback(Output('output-data-message', 'children'),
@@ -384,6 +394,8 @@ def update_output(n_clicks, market):
     return False
 
 
+
+
 @app.callback(Output('output-data-upload', 'children'),
               Output('output-data-upload-settings', 'children'),
               Input('upload-data', 'contents'),
@@ -414,7 +426,7 @@ def update_output(list_of_contents, list_of_names, list_of_dates):
             ])
         ])
     else:
-        return False, False
+        raise dash.exceptions.PreventUpdate
 
 
 if __name__ == '__main__':
