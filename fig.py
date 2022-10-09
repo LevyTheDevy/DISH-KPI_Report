@@ -2,6 +2,8 @@ import plotly.express as px
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 
+FIG_ARRAY = []
+
 DATA_KPI = ["5G KPI PCell RF Serving SS-RSRP [dBm]",
             "5G KPI PCell RF Serving SS-SINR [dB]",
             "5G KPI Total Info Layer1 PDSCH Throughput [Mbps]",
@@ -54,6 +56,7 @@ def DATA_FIG(df, name):
             
             'xanchor': 'left'},
     paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
+    FIG_ARRAY.append(fig)
     return fig
 
 
@@ -132,7 +135,7 @@ def Protocol_FIG(df, name):
             
             'xanchor': 'left'},
     paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
-
+    FIG_ARRAY.append(fig)
     return fig
 
 
@@ -153,7 +156,7 @@ def RSRP_MAP_FIG(df, name):
         
         'xanchor': 'left'},
     paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
-
+    FIG_ARRAY.append(RSRP_fig)
     return RSRP_fig
 
 
@@ -170,7 +173,7 @@ def SINR_MAP_FIG(df, name):
         
         'xanchor': 'left'},
     paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
-
+    FIG_ARRAY.append(SINR_fig)
     return SINR_fig
 
 
@@ -191,7 +194,7 @@ def VoNR_Result_MAP_FIG(df, name):
         
         'xanchor': 'left'},
     paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
-
+    FIG_ARRAY.append(results_fig)
     return results_fig
 
 def TECH_MAP_FIG(df, name):
@@ -210,7 +213,7 @@ def TECH_MAP_FIG(df, name):
         'xanchor': 'left',
         'yanchor': 'top'},
     paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
-
+    FIG_ARRAY.append(tech_results_fig)
     return tech_results_fig
 
 def VoNR_TECH_BAR_FIG(df, name):
@@ -264,6 +267,7 @@ def VoNR_TECH_BAR_FIG(df, name):
             'xanchor': 'left'},
     paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)"
     )
+    FIG_ARRAY.append(fig)
     return fig
 
 def Voice_HO_SINR_RSRP_BAR_FIG(df, name):
@@ -322,5 +326,6 @@ def Voice_HO_SINR_RSRP_BAR_FIG(df, name):
             
             'xanchor': 'left'},
     paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
-
+    FIG_ARRAY.append(fig)
     return fig
+

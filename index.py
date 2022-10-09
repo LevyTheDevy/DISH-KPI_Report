@@ -1,6 +1,7 @@
 import base64
 import datetime
 import io
+import os
 import random
 import time
 from datetime import date
@@ -11,6 +12,7 @@ import numpy as np
 import pandas as pd
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
+from Reports import Generate_Report
 from apps.Upload import navbar
 
 # Todo Before deploy
@@ -33,14 +35,21 @@ Voice_KPI_REQ = ["TIME_STAMP", "GPS Lat", "GPS Lon", "Voice Call", "5G KPI PCell
 from fig import Protocol_FIG, DATA_FIG, VoNR_TECH_BAR_FIG, VoNR_Result_MAP_FIG, TECH_MAP_FIG, \
     Voice_HO_SINR_RSRP_BAR_FIG, RSRP_MAP_FIG, SINR_MAP_FIG
 
+DATA_FIG_FUNCTION_ARRAY = [Protocol_FIG, DATA_FIG, ]
+VOICE_FIG_FUNCTION_ARRAY = [VoNR_TECH_BAR_FIG, VoNR_Result_MAP_FIG, TECH_MAP_FIG,
+                            Voice_HO_SINR_RSRP_BAR_FIG, RSRP_MAP_FIG, SINR_MAP_FIG]
+FIG_ARRAY = []
+REPORT_NAME = []
+NAME = 'MARKET DATE'
+
 gc = gspread.service_account(filename='assets/custom-producer-357322-a044a0660521.json')
 sh = gc.open("KPI_DATA")
 
 # Connect to main app.py file
 from app import app
-from app import server
 # Connect to your app pages
 from apps import Upload
+import Reports
 
 fig_layout = dbc.Container([
     dbc.Row([
@@ -79,10 +88,19 @@ fig_layout = dbc.Container([
                     )
                 ]),
                 dbc.Col([
-                    html.Div(id='Generate-output')
+                    dbc.Row([
+                        dbc.Col([html.Div(id='Generate-output')])
+                    ])
                 ])
             ]),
         ], width=6),
+    ]),
+    dbc.Row([
+        dbc.Col(dcc.Loading(
+            id="loading-121",
+            type="default",
+            children=dcc.Download(id='Generate-output-dl')
+        ), )
     ]),
     html.Div([
         dbc.Row([
@@ -244,6 +262,7 @@ def parse_contents(contents, filename, date):
               Output('Voice_HO_SINR_RSRP_BAR_FIG', 'figure'),
               Output('RSRP_MAP_FIG', 'figure'),
               Output('SINR_MAP_FIG', 'figure'),
+              Output('Generate-output', 'children'),
               Input('my-date-picker-single-report', 'date'),
               Input('input-market', 'value')
               )
@@ -255,18 +274,38 @@ def update_output(date, market):
         # Read Main DF Voice
         voice_dataframe = pd.DataFrame(sh.worksheet(market + "_Voice_" + date).get_all_records())
         voice_market_DF = voice_dataframe.convert_dtypes()
-
         name = str(date) + " " + str(market)
-        return Protocol_FIG(data_market_DF, name), \
-               DATA_FIG(data_market_DF, name), \
-               VoNR_TECH_BAR_FIG(voice_market_DF, name), \
-               VoNR_Result_MAP_FIG(voice_market_DF, name), \
-               TECH_MAP_FIG(voice_market_DF, name), \
-               Voice_HO_SINR_RSRP_BAR_FIG(voice_market_DF, name), \
-               RSRP_MAP_FIG(voice_market_DF, name), \
-               SINR_MAP_FIG(voice_market_DF, name)
+        REPORT_NAME.clear()
+        REPORT_NAME.append(name)
+        if FIG_ARRAY == []:
+            for fun in DATA_FIG_FUNCTION_ARRAY:
+                FIG_ARRAY.append(fun(data_market_DF, name))
+            for fun in VOICE_FIG_FUNCTION_ARRAY:
+                FIG_ARRAY.append(fun(voice_market_DF, name))
+        else:
+            FIG_ARRAY.clear()
+            for fun in DATA_FIG_FUNCTION_ARRAY:
+                FIG_ARRAY.append(fun(data_market_DF, name))
+            for fun in VOICE_FIG_FUNCTION_ARRAY:
+                FIG_ARRAY.append(fun(voice_market_DF, name))
+        return FIG_ARRAY[0], FIG_ARRAY[1], FIG_ARRAY[2], FIG_ARRAY[3], FIG_ARRAY[4], FIG_ARRAY[5], FIG_ARRAY[6], \
+               FIG_ARRAY[7], [
+                   html.P("Generate  PDF Report", className='pt-3'),
+                   dbc.Button(
+                       "Generate", id="Generate-val", className="me-2", n_clicks=0
+                   )]
     else:
         raise dash.exceptions.PreventUpdate
+
+
+@app.callback(Output('Generate-output-dl', 'data'), Input('Generate-val', 'n_clicks'))
+def update_output(n_clicks):
+    if n_clicks > 0:
+        if len(REPORT_NAME) >= 2:
+            return dcc.send_file("assets/reports/" + str(REPORT_NAME[0]) + ".pdf")
+        else:
+            Generate_Report(FIG_ARRAY).output("assets/reports/" + str(REPORT_NAME[0]) + ".pdf")
+            return dcc.send_file("assets/reports/" + str(REPORT_NAME[0]) + ".pdf")
 
 
 @app.callback(Output('output-data-message', 'children'),
@@ -306,7 +345,8 @@ def update_output(n_clicks, market):
             type = 'Voice'
             TYPE.append('Voice')
             try:
-                Main_Voice_worksheet = sh.add_worksheet(title=market + "_" + type + "_" + date_string, rows=100,cols=20)
+                Main_Voice_worksheet = sh.add_worksheet(title=market + "_" + type + "_" + date_string, rows=100,
+                                                        cols=20)
                 time.sleep(3)
             except:
                 Main_Voice_worksheet = sh.worksheet(market + "_" + type + "_" + date_string)
@@ -343,8 +383,6 @@ def update_output(n_clicks, market):
                 ])
     return False
 
-
-# html.Li(i) for i in worksheet_list
 
 @app.callback(Output('output-data-upload', 'children'),
               Output('output-data-upload-settings', 'children'),
