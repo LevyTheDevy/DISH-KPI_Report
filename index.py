@@ -54,6 +54,7 @@ sh = gc.open("KPI_DATA")
 
 # Connect to main app.py file
 from app import app
+from app import server
 # Connect to your app pages
 from apps import Upload
 import Reports
