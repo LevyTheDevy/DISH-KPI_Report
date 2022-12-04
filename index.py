@@ -1,12 +1,14 @@
 import base64
 import datetime
 import io
-import os
 import random
 import time
 from datetime import date
+
 import dash
 import dash_bootstrap_components as dbc
+# Diskcache
+import diskcache
 import gspread
 import numpy as np
 import pandas as pd
@@ -23,9 +25,6 @@ from apps.Upload import navbar
 # Todo HIGH: Optimize speed and comment code.
 # Todo MID: Update Graphs with Date Information.
 # Todo LOW: Add LOGO/ICON/Page Title / Credits.
-
-# Diskcache
-import diskcache
 
 cache = diskcache.Cache("./cache")
 long_callback_manager = DiskcacheLongCallbackManager(cache)
@@ -55,10 +54,8 @@ sh = gc.open("KPI_DATA")
 
 # Connect to main app.py file
 from app import app
-from app import server
 # Connect to your app pages
 from apps import Upload
-import Reports
 
 fig_layout = dbc.Container([
     dbc.Row([
