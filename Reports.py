@@ -7,7 +7,6 @@ logo = Image.open(r"IMAGES/LOGO.png").convert("RGBA")
 logo_M = Image.open(r"IMAGES/LOGO_MAIN.png").convert("RGBA")
 
 
-
 def Generate_Report(fig_array):
     NEW_FIG_ARRAY = fig_array
     # Images File Names
@@ -37,5 +36,3 @@ def Generate_Report(fig_array):
 
         pdf.image('IMAGES/' + File_Name[NEW_FIG_ARRAY.index(plot)] + ".jpeg", 0, 0, width, height)
     return pdf
-
-

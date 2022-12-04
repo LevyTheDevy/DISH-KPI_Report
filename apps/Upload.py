@@ -2,11 +2,18 @@ from dash import dcc, html
 import dash_bootstrap_components as dbc
 
 layout = html.Div([
+    html.H5("KPI Upload Data Steps", className='p-2'),
+    html.Li("Generate two .xlsx files using X-CAP FAV KPI list.", className='mr-1'),
+    html.Li("Drag and Drop or select one file at a time."),
+    html.Li("Select KPI Testing market for that data."),
+    html.Li("Upload and wait for success message output"),
+    html.Li("Repeat steps 2-4 for the other data file."),
+    html.Hr(),
     dcc.Upload(
         id='upload-data',
         children=html.Div([
             'Drag and Drop or ',
-            html.A('Select a File')
+            html.A('Select ONE  File at a Time')
         ]),
         style={
             'width': '100%',

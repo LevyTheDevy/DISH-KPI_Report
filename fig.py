@@ -11,8 +11,7 @@ DATA_KPI = ["5G KPI PCell RF Serving SS-RSRP [dBm]",
             "5G KPI PCell Layer1 DL MCS (Avg)",
             "5G KPI PCell Layer1 UL MCS (Avg)",
             "5G KPI PCell Layer1 DL BLER [%]",
-            "5G KPI PCell Layer1 UL BLER [%]"
-            ]
+            "5G KPI PCell Layer1 UL BLER [%]"]
 
 
 def AVG_MIN_MAX(df, KPI):
@@ -26,11 +25,10 @@ def DATA_FIG(df, name):
     df["AutoCallSummary Status"] = df["AutoCallSummary Status"].interpolate(method="pad")
     df_data = df[df["AutoCallSummary Status"] == "Traffic"]
 
-
     # Make Data Fig Subplots
     fig = make_subplots(
         rows=4, cols=2,
-        subplot_titles=(DATA_KPI)
+        subplot_titles=DATA_KPI
     )
     COL = 0
     ROW = 1
@@ -53,9 +51,9 @@ def DATA_FIG(df, name):
             'text': "<b> " + str(
                 name) + " - Data KPI<b>",
             'y': .93,
-            
+
             'xanchor': 'left'},
-    paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
+        paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
     FIG_ARRAY.append(fig)
     return fig
 
@@ -132,9 +130,9 @@ def Protocol_FIG(df, name):
         title={
             'text': "<b>" + str(name) + " - Protocol KPI<b>",
             'y': .93,
-            
+
             'xanchor': 'left'},
-    paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
+        paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
     FIG_ARRAY.append(fig)
     return fig
 
@@ -153,9 +151,9 @@ def RSRP_MAP_FIG(df, name):
     RSRP_fig.update_layout(mapbox_style="dark", template='plotly_dark', title={
         'text': "<b>" + str(name) + " - RSRP - MAP<b>",
         'y': .93,
-        
+
         'xanchor': 'left'},
-    paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
+                           paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
     FIG_ARRAY.append(RSRP_fig)
     return RSRP_fig
 
@@ -170,9 +168,9 @@ def SINR_MAP_FIG(df, name):
     SINR_fig.update_layout(mapbox_style="dark", template='plotly_dark', title={
         'text': "<b>" + str(name) + " - SINR - MAP<b>",
         'y': .93,
-        
+
         'xanchor': 'left'},
-    paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
+                           paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
     FIG_ARRAY.append(SINR_fig)
     return SINR_fig
 
@@ -188,14 +186,15 @@ def VoNR_Result_MAP_FIG(df, name):
     results_fig = px.scatter_mapbox(map_df, lat="GPS Lat", lon="GPS Lon", color="Voice Call", size_max=20, zoom=10.5,
                                     labels={"Voice Call": "<b>VoNR Results<b>"})
 
-    results_fig.update_layout(mapbox_style="dark", template='plotly_dark', title={
+    results_fig.update_layout(mapbox_style="open-street-map", template='plotly_dark', title={
         'text': "<b>" + str(name) + " - Voice Call - MAP<b>",
         'y': .93,
-        
+
         'xanchor': 'left'},
-    paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
+                              paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
     FIG_ARRAY.append(results_fig)
     return results_fig
+
 
 def TECH_MAP_FIG(df, name):
     df = df.replace(to_replace="5G-NR_SA(2CA)", value="5G-NR_SA")
@@ -209,15 +208,15 @@ def TECH_MAP_FIG(df, name):
     tech_results_fig.update_layout(mapbox_style="dark", template='plotly_dark', title={
         'text': "<b>" + str(name) + " - Event Technology - MAP<b>",
         'y': 0.93,
-        
+
         'xanchor': 'left',
         'yanchor': 'top'},
-    paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
+                                   paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
     FIG_ARRAY.append(tech_results_fig)
     return tech_results_fig
 
-def VoNR_TECH_BAR_FIG(df, name):
 
+def VoNR_TECH_BAR_FIG(df, name):
     df = df.replace(to_replace="5G-NR_SA(2CA)", value="5G-NR_SA")
     df = df.replace(to_replace="LTE(2CA)", value="LTE")
     df = df.replace(to_replace="End By Pause", value="No Page")
@@ -232,7 +231,6 @@ def VoNR_TECH_BAR_FIG(df, name):
     s = df["Event Technology"].value_counts()
     # Make a DF from call results
     df_tech_count = s.to_frame(name='Count')
-
 
     fig = make_subplots(
         rows=1, cols=2,
@@ -263,12 +261,13 @@ def VoNR_TECH_BAR_FIG(df, name):
             'text': "<b>" + str(
                 name) + " - Voice KPI<b>",
             'y': .93,
-            
+
             'xanchor': 'left'},
-    paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)"
+        paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)"
     )
     FIG_ARRAY.append(fig)
     return fig
+
 
 def Voice_HO_SINR_RSRP_BAR_FIG(df, name):
     # Getting the string count of call result to int
@@ -323,9 +322,8 @@ def Voice_HO_SINR_RSRP_BAR_FIG(df, name):
             'text': "<b>" + str(
                 name) + " - Voice KPI<b>",
             'y': .93,
-            
+
             'xanchor': 'left'},
-    paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
+        paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
     FIG_ARRAY.append(fig)
     return fig
-

@@ -24,8 +24,9 @@ from apps.Upload import navbar
 # Todo MID: Update Graphs with Date Information.
 # Todo LOW: Add LOGO/ICON/Page Title / Credits.
 
-## Diskcache
+# Diskcache
 import diskcache
+
 cache = diskcache.Cache("./cache")
 long_callback_manager = DiskcacheLongCallbackManager(cache)
 
@@ -78,7 +79,7 @@ fig_layout = dbc.Container([
                         html.P("Select Date", className='pt-3'),
                         dcc.DatePickerSingle(
                             id='my-date-picker-single-report',
-                            min_date_allowed=date(2022, 9, 20),
+                            min_date_allowed=date(2022, 10, 5),
                             max_date_allowed=date(2023, 9, 20),
                             initial_visible_month=date.today(),
                             date=date.today()
@@ -231,11 +232,7 @@ def parse_contents(contents, filename, date):
 
     decoded = base64.b64decode(content_string)
     try:
-        if 'csv' in filename:
-            # Assume that the user uploaded a CSV file
-            df = pd.read_csv(
-                io.StringIO(decoded.decode('utf-8')))
-        elif 'xls' in filename:
+        if 'xls' in filename:
             # Assume that the user uploaded an excel file
             df = pd.read_excel(io.BytesIO(decoded))
             df = df.fillna(np.nan).replace([np.nan], ['NaN'])
@@ -249,6 +246,11 @@ def parse_contents(contents, filename, date):
             except:
                 Temp_worksheet = sh.worksheet(str(TEMP_NAME[0]))
             Temp_worksheet.update([df.columns.values.tolist()] + df.values.tolist())
+        else:
+            return html.Div([
+                'Only excepts .xls file type'
+            ])
+
     except Exception as e:
         print(e)
         return html.Div([
@@ -306,7 +308,7 @@ def update_output(date, market):
         raise dash.exceptions.PreventUpdate
 
 
-@app.callback(Output('Generate-output-dl', 'data'), Input('Generate-val', 'n_clicks'), manager=long_callback_manager,)
+@app.callback(Output('Generate-output-dl', 'data'), Input('Generate-val', 'n_clicks'), manager=long_callback_manager, )
 def update_output(n_clicks):
     if n_clicks > 0:
         if len(REPORT_NAME) >= 2:
@@ -324,7 +326,7 @@ def update_output(n_clicks):
               Input('input-market-upload', 'value')
               )
 def update_output(n_clicks, market):
-    if n_clicks > 0:
+    if n_clicks > 0 and market is not None:
         T_dataframe = pd.DataFrame(sh.worksheet(TEMP_NAME[0]).get_all_records())
         T_ARRAY = []
         df_date = T_dataframe['TIME_STAMP'].iloc[0]
@@ -393,8 +395,6 @@ def update_output(n_clicks, market):
                     html.P(str(Voice_KPI_REQ))
                 ])
     return False
-
-
 
 
 @app.callback(Output('output-data-upload', 'children'),
