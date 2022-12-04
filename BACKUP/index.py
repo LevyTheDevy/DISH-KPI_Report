@@ -50,7 +50,7 @@ FIG_ARRAY = []
 REPORT_NAME = []
 NAME = 'MARKET DATE'
 
-gc = gspread.service_account(filename='assets/custom-producer-357322-a044a0660521.json')
+gc = gspread.service_account(filename='assets/key.json')
 sh = gc.open("KPI_DATA")
 
 # Connect to main app.py file
