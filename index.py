@@ -324,6 +324,7 @@ def update_output(n_clicks):
               )
 def update_output(n_clicks, market):
     if n_clicks > 0 and market is not None:
+        # Make a temp data frame in google sheets.
         T_dataframe = pd.DataFrame(sh.worksheet(TEMP_NAME[0]).get_all_records())
         T_ARRAY = []
         df_date = T_dataframe['TIME_STAMP'].iloc[0]
