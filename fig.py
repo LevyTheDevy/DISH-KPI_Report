@@ -49,11 +49,8 @@ def DATA_FIG(df, name):
         template='plotly_dark',
         title={
             'text': "<b> " + str(
-                name) + " - Data KPI<b>",
-            'y': .93,
-
-            'xanchor': 'left'},
-        paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
+                name) + " - Data KPI<b>"},
+        )
     FIG_ARRAY.append(fig)
     return fig
 
@@ -128,11 +125,8 @@ def Protocol_FIG(df, name):
         showlegend=False,
         template='plotly_dark',
         title={
-            'text': "<b>" + str(name) + " - Protocol KPI<b>",
-            'y': .93,
-
-            'xanchor': 'left'},
-        paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
+            'text': "<b>" + str(name) + " - Protocol KPI<b>"},
+        )
     FIG_ARRAY.append(fig)
     return fig
 
@@ -149,11 +143,8 @@ def RSRP_MAP_FIG(df, name):
                                  labels={"5G KPI PCell RF Serving SS-RSRP [dBm]": "<b>RSRP [dBm]<b>"})
 
     RSRP_fig.update_layout(mapbox_style="dark", template='plotly_dark', title={
-        'text': "<b>" + str(name) + " - RSRP - MAP<b>",
-        'y': .93,
-
-        'xanchor': 'left'},
-                           paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
+        'text': "<b>" + str(name) + " - RSRP - MAP<b>"},
+                           )
     FIG_ARRAY.append(RSRP_fig)
     return RSRP_fig
 
@@ -166,11 +157,8 @@ def SINR_MAP_FIG(df, name):
                                  labels={"5G KPI PCell RF Serving SS-SINR [dB]": "<b>SINR [dB]<b>"})
 
     SINR_fig.update_layout(mapbox_style="dark", template='plotly_dark', title={
-        'text': "<b>" + str(name) + " - SINR - MAP<b>",
-        'y': .93,
-
-        'xanchor': 'left'},
-                           paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
+        'text': "<b>" + str(name) + " - SINR - MAP<b>"},
+                           )
     FIG_ARRAY.append(SINR_fig)
     return SINR_fig
 
@@ -186,12 +174,9 @@ def VoNR_Result_MAP_FIG(df, name):
     results_fig = px.scatter_mapbox(map_df, lat="GPS Lat", lon="GPS Lon", color="Voice Call", size_max=20, zoom=10.5,
                                     labels={"Voice Call": "<b>VoNR Results<b>"})
 
-    results_fig.update_layout(mapbox_style="open-street-map", template='plotly_dark', title={
-        'text': "<b>" + str(name) + " - Voice Call - MAP<b>",
-        'y': .93,
-
-        'xanchor': 'left'},
-                              paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
+    results_fig.update_layout(mapbox_style="dark", template='plotly_dark', title={
+        'text': "<b>" + str(name) + " - Voice Call - MAP<b>"},
+                              )
     FIG_ARRAY.append(results_fig)
     return results_fig
 
@@ -206,12 +191,8 @@ def TECH_MAP_FIG(df, name):
                                          labels={"Event Technology": "<b>Event Technology<b>"})
 
     tech_results_fig.update_layout(mapbox_style="dark", template='plotly_dark', title={
-        'text': "<b>" + str(name) + " - Event Technology - MAP<b>",
-        'y': 0.93,
-
-        'xanchor': 'left',
-        'yanchor': 'top'},
-                                   paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
+        'text': "<b>" + str(name) + " - Event Technology - MAP<b>"},
+                                   )
     FIG_ARRAY.append(tech_results_fig)
     return tech_results_fig
 
@@ -259,11 +240,8 @@ def VoNR_TECH_BAR_FIG(df, name):
         template='plotly_dark',
         title={
             'text': "<b>" + str(
-                name) + " - Voice KPI<b>",
-            'y': .93,
-
-            'xanchor': 'left'},
-        paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)"
+                name) + " - Voice KPI<b>"},
+        
     )
     FIG_ARRAY.append(fig)
     return fig
@@ -320,10 +298,7 @@ def Voice_HO_SINR_RSRP_BAR_FIG(df, name):
         template='plotly_dark',
         title={
             'text': "<b>" + str(
-                name) + " - Voice KPI<b>",
-            'y': .93,
-
-            'xanchor': 'left'},
-        paper_bgcolor="rgba(0,0,0,.2)", plot_bgcolor="rgba(0,0,0,.2)")
+                name) + " - Voice KPI<b>"},
+        )
     FIG_ARRAY.append(fig)
     return fig

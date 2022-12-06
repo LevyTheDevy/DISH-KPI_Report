@@ -12,11 +12,11 @@ def Generate_Report(fig_array):
     # Images File Names
     pdf = FPDF()
     for plot in NEW_FIG_ARRAY:
-        plot.write_image("IMAGES/" + File_Name[NEW_FIG_ARRAY.index(plot)] + ".jpeg", width=1122.5, height=794)
-        cover = Image.open('IMAGES/' + File_Name[NEW_FIG_ARRAY.index(plot)] + ".jpeg")
+        plot.write_image("IMAGES/" + File_Name[NEW_FIG_ARRAY.index(plot)] + ".png", width=1122.5, height=794)
+        cover = Image.open('IMAGES/' + File_Name[NEW_FIG_ARRAY.index(plot)] + ".png")
         cover.paste(logo, (1080, 760,), logo)
         cover.paste(logo_M, (455, 15,), logo_M)
-        cover.save("IMAGES/" + File_Name[NEW_FIG_ARRAY.index(plot)] + ".jpeg", format='jpeg')
+        cover.save("IMAGES/" + File_Name[NEW_FIG_ARRAY.index(plot)] + ".png", format='png')
         width, height = cover.size
 
         # convert pixel in mm with 1px=0.264583 mm
@@ -34,5 +34,5 @@ def Generate_Report(fig_array):
 
         pdf.add_page(orientation=orientation)
 
-        pdf.image('IMAGES/' + File_Name[NEW_FIG_ARRAY.index(plot)] + ".jpeg", 0, 0, width, height)
+        pdf.image('IMAGES/' + File_Name[NEW_FIG_ARRAY.index(plot)] + ".png", 0, 0, width, height)
     return pdf

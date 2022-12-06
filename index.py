@@ -65,8 +65,7 @@ fig_layout = dbc.Container([
         dbc.Col([
             html.Div([
                 html.H5("DISH KPI Report Tool"),
-                html.P(
-                    "This tool is used for uploading KPI data in different markets and analyzing it on a daily basis. You can upload new file by clicking on the dropdown menu and selecting upload"),
+                html.P("This tool is used for uploading KPI data in different markets and analyzing it on a daily basis. You can upload new file by clicking on the dropdown menu and selecting upload"),
                 html.Hr(),
                 html.Div(id='Error-output')
             ], className='pt-3')
