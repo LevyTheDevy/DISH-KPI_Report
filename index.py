@@ -1,6 +1,7 @@
 import base64
 import datetime
 import io
+import os
 import random
 import time
 from datetime import date
@@ -29,15 +30,15 @@ from apps.Upload import navbar
 cache = diskcache.Cache("./cache")
 long_callback_manager = DiskcacheLongCallbackManager(cache)
 
-Data_KPI_REQ = ["TIME_STAMP", "GPS Lon", "GPS Lat", "Event Technology", "5G KPI PCell RF Serving SS-RSRP [dBm]",
+Data_KPI_REQ = ["Unnamed: 0","TIME_STAMP", "GPS Lon", "GPS Lat", "Event Technology", "5G KPI PCell RF Serving SS-RSRP [dBm]",
                 "5G KPI PCell RF Serving SS-SINR [dB]", "5G KPI Total Info Layer1 PDSCH Throughput [Mbps]",
                 "5G KPI Total Info Layer1 PUSCH Throughput [Mbps]", "5G KPI PCell Layer1 DL BLER [%]",
                 "5G KPI PCell Layer1 UL BLER [%]", "5G KPI PCell Layer1 DL MCS (Avg)",
                 "5G KPI PCell Layer1 UL MCS (Avg)", "AutoCallSummary Status", "5G KPI PCell Layer1 RACH Reason",
                 "5G KPI PCell Layer1 RACH Result", "5G KPI PCell RF Band", "5G KPI Total Info DL CA Type"]
-Voice_KPI_REQ = ["TIME_STAMP", "GPS Lat", "GPS Lon", "Voice Call", "5G KPI PCell RF Serving SS-RSRP [dBm]",
+Voice_KPI_REQ = ["Unnamed: 0","TIME_STAMP", "GPS Lat", "GPS Lon", "Voice Call", "5G KPI PCell RF Serving SS-RSRP [dBm]",
                  "5G KPI PCell RF Serving SS-SINR [dB]", "Event Technology",
-                 "5G-NR RRC NR MCG Mobility Statistics Intra-NR HandoverResult", "AutoCallSummary Status"]
+                 "5G-NR RRC NR MCG Mobility Statistics Intra-NR HandoverResult", "AutoCallSummary Status", "MOS P863(POLQA)"]
 
 from fig import Protocol_FIG, DATA_FIG, VoNR_TECH_BAR_FIG, VoNR_Result_MAP_FIG, TECH_MAP_FIG, \
     Voice_HO_SINR_RSRP_BAR_FIG, RSRP_MAP_FIG, SINR_MAP_FIG
@@ -49,8 +50,7 @@ FIG_ARRAY = []
 REPORT_NAME = []
 NAME = 'MARKET DATE'
 
-gc = gspread.service_account(filename='assets/key.json')
-sh = gc.open("KPI_DATA")
+
 
 # Connect to main app.py file
 from app import app
@@ -236,14 +236,10 @@ def parse_contents(contents, filename, date):
             df = df.fillna(np.nan).replace([np.nan], ['NaN'])
             df['TIME_STAMP'] = df['TIME_STAMP'].astype(str)
             if TEMP_NAME != []:
-                sh.del_worksheet(sh.worksheet(TEMP_NAME[0]))
+                os.remove(TEMP_NAME[0] + ".xlsx")
                 TEMP_NAME.clear()
             TEMP_NAME.append("TEMP_" + str(random.randint(0, 500)))
-            try:
-                Temp_worksheet = sh.add_worksheet(title=str(TEMP_NAME[0]), rows=100, cols=20)
-            except:
-                Temp_worksheet = sh.worksheet(str(TEMP_NAME[0]))
-            Temp_worksheet.update([df.columns.values.tolist()] + df.values.tolist())
+            df.to_excel(TEMP_NAME[0] + ".xlsx")
         else:
             return html.Div([
                 'Only excepts .xls file type'
@@ -277,10 +273,10 @@ def parse_contents(contents, filename, date):
 def update_output(date, market):
     if market is not None:
         # Read Main DF DATA
-        data_dataframe = pd.DataFrame(sh.worksheet(market + "_Data_" + date).get_all_records())
+        data_dataframe = pd.read_excel(market + "_Data_" + date + ".xlsx")
         data_market_DF = data_dataframe.convert_dtypes()
         # Read Main DF Voice
-        voice_dataframe = pd.DataFrame(sh.worksheet(market + "_Voice_" + date).get_all_records())
+        voice_dataframe = pd.read_excel(market + "_Voice_" + date + ".xlsx")
         voice_market_DF = voice_dataframe.convert_dtypes()
         name = str(date) + " " + str(market)
         REPORT_NAME.clear()
@@ -326,7 +322,7 @@ def update_output(n_clicks):
 def update_output(n_clicks, market):
     if n_clicks > 0 and market is not None:
         # Make a temp data frame in google sheets.
-        T_dataframe = pd.DataFrame(sh.worksheet(TEMP_NAME[0]).get_all_records())
+        T_dataframe = pd.read_excel(TEMP_NAME[0] + ".xlsx", index_col=None)
         T_ARRAY = []
         df_date = T_dataframe['TIME_STAMP'].iloc[0]
         date_string = str(df_date).split()[0]
@@ -337,39 +333,27 @@ def update_output(n_clicks, market):
         if T_ARRAY == Data_KPI_REQ:
             type = 'Data'
             TYPE.append('Data')
-            try:
-                Main_Data_worksheet = sh.add_worksheet(title=market + "_" + type + "_" + date_string, rows=100, cols=20)
-                time.sleep(3)
-            except:
-                Main_Data_worksheet = sh.worksheet(market + "_" + type + "_" + date_string)
-                time.sleep(1)
-            M_dataframe = pd.DataFrame(Main_Data_worksheet.get_all_records())
+            M_dataframe = pd.DataFrame()
             time.sleep(1)
             dataframe = pd.concat([M_dataframe, T_dataframe], axis=0)
             dataframe = dataframe.fillna(np.nan).replace([np.nan], ['NaN'])
             # Write Main DF
-            Main_Data_worksheet.update([dataframe.columns.values.tolist()] + dataframe.values.tolist())
+            dataframe.to_excel(market + "_" + type + "_" + date_string + ".xlsx")
             time.sleep(3)
-            sh.del_worksheet(sh.worksheet(TEMP_NAME[0]))
+            os.remove(TEMP_NAME[0] + '.xlsx')
             TEMP_NAME.clear()
             return html.H5("TPUT Data uploaded successfully!", className='text-success')
         elif T_ARRAY == Voice_KPI_REQ:
             type = 'Voice'
             TYPE.append('Voice')
-            try:
-                Main_Voice_worksheet = sh.add_worksheet(title=market + "_" + type + "_" + date_string, rows=100,
-                                                        cols=20)
-                time.sleep(3)
-            except:
-                Main_Voice_worksheet = sh.worksheet(market + "_" + type + "_" + date_string)
-                time.sleep(1)
-            M_dataframe = pd.DataFrame(Main_Voice_worksheet.get_all_records())
+            M_dataframe = pd.DataFrame()
+            time.sleep(1)
             dataframe = pd.concat([M_dataframe, T_dataframe], axis=0)
             dataframe = dataframe.fillna(np.nan).replace([np.nan], ['NaN'])
             # Write Main DF
-            Main_Voice_worksheet.update([dataframe.columns.values.tolist()] + dataframe.values.tolist())
+            dataframe.to_excel(market + "_" + type + "_" + date_string + ".xlsx")
             time.sleep(3)
-            sh.del_worksheet(sh.worksheet(TEMP_NAME[0]))
+            os.remove(TEMP_NAME[0] + '.xlsx')
             TEMP_NAME.clear()
             return html.H5("Voice Data uploaded successfully!", className='text-success')
         else:
